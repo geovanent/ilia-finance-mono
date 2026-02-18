@@ -1,6 +1,8 @@
 export class InvalidAmountError extends Error {
   constructor(value: number) {
-    super(`Invalid amount: ${value}. Amount must be a positive integer greater than 0.`);
+    super(
+      `Invalid amount: ${value}. Amount must be a positive integer greater than 0.`,
+    );
     this.name = 'InvalidAmountError';
   }
 }
