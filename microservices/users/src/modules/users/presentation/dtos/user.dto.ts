@@ -22,15 +22,3 @@ export class LoginUserDto {
   @IsString()
   password!: string;
 }
-
-export class UserResponseDto {
-  id!: string;
-  firstName!: string;
-  lastName!: string;
-  email!: string;
-}
-
-export class AuthResponseDto {
-  user!: UserResponseDto;
-  access_token!: string;
-}
