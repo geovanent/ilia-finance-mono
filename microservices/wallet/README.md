@@ -1,26 +1,26 @@
 # Wallet Microservice
 
-Microsserviço de carteira digital responsável por armazenar e gerenciar transações financeiras dos usuários (crédito e débito), com autenticação JWT e integração ao microsserviço Users via gRPC para validação de usuário.
+Digital wallet microservice responsible for storing and managing user financial transactions (credit and debit), with JWT authentication and integration with the Users microservice via gRPC for user validation.
 
-## Tecnologias
+## Technologies
 
 - **Node.js** + **TypeScript**
 - **NestJS** 11
 - **TypeORM** + **PostgreSQL**
-- **Passport** + **JWT** (autenticação)
-- **gRPC** (cliente para o microsserviço Users)
+- **Passport** + **JWT** (authentication)
+- **gRPC** (client for the Users microservice)
 - **class-validator** / **class-transformer**
-- **Jest** (testes)
+- **Jest** (tests)
 
-## Como rodar
+## How to run
 
-Na raiz do monorepo, com as variáveis de ambiente configuradas (ex.: `.env` ou `.env.development`):
+From the monorepo root, with environment variables set (e.g. `.env` or `.env.dev`):
 
 ```bash
 docker-compose up
 ```
 
-O Wallet sobe junto com os demais serviços (Wallet DB, Users, Users DB). Para rodar apenas o Wallet em modo desenvolvimento:
+The Wallet runs together with the other services (Wallet DB, Users, Users DB). To run only the Wallet in development mode:
 
 ```bash
 cd microservices/wallet
@@ -28,53 +28,53 @@ npm install
 npm run start:dev
 ```
 
-Requer PostgreSQL acessível e, para criação de transações, o microsserviço Users (gRPC) disponível.
+Requires PostgreSQL and, for creating transactions, the Users microservice (gRPC) must be available.
 
 ## Endpoints
 
-Todos os endpoints (exceto health, se existir) exigem **JWT** no header: `Authorization: Bearer <token>`.
+All endpoints (except health, if any) require **JWT** in the header: `Authorization: Bearer <token>`.
 
-| Método | Path | Descrição |
-|--------|------|-----------|
-| POST   | `/wallet/transactions` | Cria uma transação (CREDIT ou DEBIT). Corpo: `{ "amount": number, "type": "CREDIT" \| "DEBIT" }`. `userId` vem do token. |
-| GET    | `/wallet/balance`      | Retorna o saldo consolidado do usuário autenticado. |
-| GET    | `/wallet/transactions` | Lista transações do usuário. Query opcional: `?type=CREDIT` ou `?type=DEBIT`. |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST   | `/wallet/transactions` | Create a transaction (CREDIT or DEBIT). Body: `{ "amount": number, "type": "CREDIT" \| "DEBIT" }`. `userId` is taken from the token. |
+| GET    | `/wallet/balance`      | Returns the authenticated user's consolidated balance. |
+| GET    | `/wallet/transactions` | List the user's transactions. Optional query: `?type=CREDIT` or `?type=DEBIT`. |
 
-As respostas HTTP são envelopadas no formato padrão do interceptor (metadata + data).
+HTTP responses are wrapped in the standard interceptor format (metadata + data).
 
-## Variáveis de ambiente
+## Environment variables
 
-| Variável | Descrição | Exemplo |
-|----------|------------|---------|
-| `WALLET_PORT` | Porta HTTP do Wallet | `3001` |
-| `JWT_SECRET` | Chave para validar JWT das requisições HTTP | `ILIACHALLENGE` |
-| `JWT_SECRET_INTERNAL` | Chave para gerar JWT nas chamadas gRPC ao Users | `ILIACHALLENGE_INTERNAL` |
-| `DB_WALLET_HOST` | Host do PostgreSQL do Wallet | `wallet_db` |
-| `DB_WALLET_PORT` | Porta do PostgreSQL | `5432` |
-| `DB_WALLET_USER` | Usuário do banco | `iliachallenge_user` |
-| `DB_WALLET_PASSWORD` | Senha do banco | `iliachallenge_pass` |
-| `DB_WALLET_NAME` | Nome do banco | `iliachallenge_db` |
-| `USERS_GRPC_URL` | URL do servidor gRPC do Users (para CheckUserExists) | `users_app:50051` |
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `WALLET_PORT` | Wallet HTTP port | `3001` |
+| `JWT_SECRET` | Key to validate JWT on HTTP requests | `ILIACHALLENGE` |
+| `JWT_SECRET_INTERNAL` | Key to generate JWT for gRPC calls to Users | `ILIACHALLENGE_INTERNAL` |
+| `DB_WALLET_HOST` | Wallet PostgreSQL host | `wallet_db` |
+| `DB_WALLET_PORT` | PostgreSQL port | `5432` |
+| `DB_WALLET_USER` | Database user | `iliachallenge_user` |
+| `DB_WALLET_PASSWORD` | Database password | `iliachallenge_pass` |
+| `DB_WALLET_NAME` | Database name | `iliachallenge_db` |
+| `USERS_GRPC_URL` | Users gRPC server URL (for CheckUserExists) | `users_app:50051` |
 
-## Arquitetura
+## Architecture
 
-O microsserviço segue **Clean Architecture** (DDD):
+The microservice follows **Clean Architecture** (DDD):
 
-- **Domain**: entidades (`Transaction`, `Wallet`), value objects (`Amount`), erros de domínio, interface do repositório (`IWalletRepository`).
-- **Application**: use cases (`CreateTransactionUseCase`, `ListTransactionsUseCase`, `GetBalanceUseCase`), DTOs de aplicação.
-- **Infrastructure**: TypeORM (entidades, `WalletRepository`), adaptador gRPC para o Users (`UsersGrpcAdapter`), auth (JWT strategy, guard).
-- **Presentation**: controller HTTP, DTOs de entrada/saída com class-validator.
+- **Domain**: entities (`Transaction`, `Wallet`), value objects (`Amount`), domain errors, repository interface (`IWalletRepository`).
+- **Application**: use cases (`CreateTransactionUseCase`, `ListTransactionsUseCase`, `GetBalanceUseCase`), application DTOs.
+- **Infrastructure**: TypeORM (entities, `WalletRepository`), gRPC adapter for Users (`UsersGrpcAdapter`), auth (JWT strategy, guard).
+- **Presentation**: HTTP controller, input/output DTOs with class-validator.
 
-O padrão **Either** é usado para tratamento de erros nos use cases (ex.: `InvalidAmountError`, `UserNotFoundError`, `InsufficientBalanceError`).
+The **Either** pattern is used for error handling in use cases (e.g. `InvalidAmountError`, `UserNotFoundError`, `InsufficientBalanceError`).
 
-## Testes
+## Tests
 
 ```bash
 cd microservices/wallet
 npm run test
 ```
 
-Testes unitários com Jest. Cobertura:
+Unit tests with Jest. Coverage:
 
 ```bash
 npm run test:cov

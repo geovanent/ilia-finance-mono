@@ -1,27 +1,27 @@
 # Users Microservice
 
-Microsserviço de usuários e autenticação: registro, login e exposição do usuário autenticado. Expõe também um serviço gRPC interno para validação de existência de usuário (usado pelo Wallet).
+User and authentication microservice: registration, login, and exposing the authenticated user. It also exposes an internal gRPC service for user existence validation (used by the Wallet).
 
-## Tecnologias
+## Technologies
 
 - **Node.js** + **TypeScript**
 - **NestJS** 11
 - **TypeORM** + **PostgreSQL**
-- **Passport** + **JWT** (autenticação HTTP)
-- **gRPC** (servidor interno na porta 50051)
-- **bcrypt** (hash de senha)
+- **Passport** + **JWT** (HTTP authentication)
+- **gRPC** (internal server on port 50051)
+- **bcrypt** (password hashing)
 - **class-validator** / **class-transformer**
-- **Jest** (testes)
+- **Jest** (tests)
 
-## Como rodar
+## How to run
 
-Na raiz do monorepo, com variáveis de ambiente configuradas (ex.: `.env` ou `.env.development`):
+From the monorepo root, with environment variables set (e.g. `.env` or `.env.dev`):
 
 ```bash
 docker-compose up
 ```
 
-O Users sobe junto com os demais serviços. Para rodar apenas o Users em modo desenvolvimento:
+Users runs together with the other services. To run only the Users microservice in development mode:
 
 ```bash
 cd microservices/users
@@ -29,60 +29,60 @@ npm install
 npm run start:dev
 ```
 
-Requer PostgreSQL acessível.
+Requires PostgreSQL.
 
-## Endpoints HTTP
+## HTTP endpoints
 
-| Método | Path | Descrição |
-|--------|------|-----------|
-| POST | `/users` | Registro. Corpo: `{ "firstName", "lastName", "email", "password" }` (password mínimo 8 caracteres). Retorna `{ user, access_token }`. |
-| POST | `/auth` | Login. Corpo: `{ "email", "password" }`. Retorna `{ user, access_token }`. |
-| GET  | `/users/me` | Dados do usuário autenticado. Requer `Authorization: Bearer <token>`. |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/users` | Register. Body: `{ "firstName", "lastName", "email", "password" }` (password min 8 characters). Returns `{ user, access_token }`. |
+| POST | `/auth` | Login. Body: `{ "email", "password" }`. Returns `{ user, access_token }`. |
+| GET  | `/users/me` | Authenticated user data. Requires `Authorization: Bearer <token>`. |
 
-## Serviço gRPC
+## gRPC service
 
-- **Pacote**: `users_internal`
-- **Serviço**: `UsersInternalService`
-- **Porta**: `50051` (configurável via `USERS_GRPC_URL` no cliente)
+- **Package**: `users_internal`
+- **Service**: `UsersInternalService`
+- **Port**: `50051` (configurable via `USERS_GRPC_URL` on the client)
 
 ### RPC
 
 - **CheckUserExists**
   - **Request**: `{ user_id: string }`
   - **Response**: `{ exists: boolean }`
-  - Usado pelo Wallet para validar usuário antes de criar transação. Pode exigir token interno (JWT) nos metadata da chamada.
+  - Used by the Wallet to validate user before creating a transaction. May require an internal token (JWT) in the call metadata.
 
-## Variáveis de ambiente
+## Environment variables
 
-| Variável | Descrição | Exemplo |
-|----------|------------|---------|
-| `USERS_PORT` | Porta HTTP | `3002` |
-| `JWT_SECRET` | Chave para assinar/validar JWT das sessões HTTP | `ILIACHALLENGE` |
-| `JWT_SECRET_INTERNAL` | Chave para validar JWT das chamadas gRPC internas | `ILIACHALLENGE_INTERNAL` |
-| `DB_USERS_HOST` | Host do PostgreSQL | `users_db` |
-| `DB_USERS_PORT` | Porta do PostgreSQL | `5432` |
-| `DB_USERS_USER` | Usuário do banco | `user_challenge` |
-| `DB_USERS_PASSWORD` | Senha do banco | `pass_challenge` |
-| `DB_USERS_NAME` | Nome do banco | `users_db` |
-| `USERS_GRPC_URL` | Endereço em que o servidor gRPC escuta (opcional) | `0.0.0.0:50051` |
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `USERS_PORT` | HTTP port | `3002` |
+| `JWT_SECRET` | Key to sign/validate JWT for HTTP sessions | `ILIACHALLENGE` |
+| `JWT_SECRET_INTERNAL` | Key to validate JWT for internal gRPC calls | `ILIACHALLENGE_INTERNAL` |
+| `DB_USERS_HOST` | PostgreSQL host | `users_db` |
+| `DB_USERS_PORT` | PostgreSQL port | `5432` |
+| `DB_USERS_USER` | Database user | `user_challenge` |
+| `DB_USERS_PASSWORD` | Database password | `pass_challenge` |
+| `DB_USERS_NAME` | Database name | `users_db` |
+| `USERS_GRPC_URL` | Address the gRPC server listens on (optional) | `0.0.0.0:50051` |
 
-## Arquitetura
+## Architecture
 
-O microsserviço segue **Clean Architecture** (DDD):
+The microservice follows **Clean Architecture** (DDD):
 
-- **Domain**: entidade `User`, repositório `IUserRepository`, serviço de auth `IAuthService`.
-- **Application**: use cases `RegisterUser` e `LoginUser`.
-- **Infrastructure**: TypeORM (entidade, `UserRepository`), adaptador de auth (bcrypt + JwtService), estratégia Passport JWT, servidor gRPC (`UsersGrpcServerService`).
-- **Presentation**: controller HTTP, DTOs com class-validator.
+- **Domain**: `User` entity, `IUserRepository` repository, `IAuthService` auth service.
+- **Application**: `RegisterUser` and `LoginUser` use cases.
+- **Infrastructure**: TypeORM (entity, `UserRepository`), auth adapter (bcrypt + JwtService), Passport JWT strategy, gRPC server (`UsersGrpcServerService`).
+- **Presentation**: HTTP controller, DTOs with class-validator.
 
-## Testes
+## Tests
 
 ```bash
 cd microservices/users
 npm run test
 ```
 
-Cobertura:
+Coverage:
 
 ```bash
 npm run test:cov
