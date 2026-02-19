@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { Inject, UnauthorizedException } from '@nestjs/common';
 import { IUserRepository } from '../../domain/repository/IUserRepository.js';
 import { IAuthService } from '../../domain/services/IAuthService.js';
 import type { AuthResult, UserResponse } from './RegisterUser.js';
@@ -10,8 +10,8 @@ export interface LoginUserInput {
 
 export class LoginUser {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly authService: IAuthService,
+    @Inject(IUserRepository) private readonly userRepository: IUserRepository,
+    @Inject(IAuthService) private readonly authService: IAuthService,
   ) {}
 
   async execute(input: LoginUserInput): Promise<AuthResult> {
