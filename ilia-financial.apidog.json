@@ -1,0 +1,153 @@
+{
+  "info": {
+    "name": "Ilia Financial API",
+    "description": "API collection for manual testing of Users and Wallet microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "register-user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["users"]
+            },
+            "description": "Register a new user. Returns user and access_token."
+          }
+        },
+        {
+          "name": "login-user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/auth",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["auth"]
+            },
+            "description": "Login. Returns user and access_token. Use the token in Authorization header for Wallet requests."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "item": [
+        {
+          "name": "balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "JWT from login or register"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/wallet/balance",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["wallet", "balance"]
+            },
+            "description": "Get consolidated balance for the authenticated user."
+          }
+        },
+        {
+          "name": "create-credit-transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "JWT from login or register"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"CREDIT\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/wallet/transactions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["wallet", "transactions"]
+            },
+            "description": "Create a credit transaction. amount must be a positive integer."
+          }
+        },
+        {
+          "name": "create-debit-transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "JWT from login or register"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50,\n  \"type\": \"DEBIT\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/wallet/transactions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["wallet", "transactions"]
+            },
+            "description": "Create a debit transaction. Fails if balance is insufficient."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

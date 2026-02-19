@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  wallet_db:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${DB_WALLET_NAME:-wallet}
+      POSTGRES_USER: ${DB_WALLET_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_WALLET_PASSWORD:-postgres}
+    volumes:
+      - wallet_data:/var/lib/postgresql/data
+
+  wallet_app:
+    build: ./microservices/wallet
+    ports:
+      - '${WALLET_PORT:-3001}:${WALLET_PORT:-3001}'
+    depends_on:
+      - wallet_db
+      - users_app
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      WALLET_PORT: ${WALLET_PORT:-3001}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET_INTERNAL: ${JWT_SECRET_INTERNAL}
+      DB_WALLET_HOST: wallet_db
+      DB_WALLET_NAME: ${DB_WALLET_NAME:-wallet}
+      DB_WALLET_USER: ${DB_WALLET_USER:-postgres}
+      DB_WALLET_PASSWORD: ${DB_WALLET_PASSWORD:-postgres}
+      USERS_GRPC_URL: users_app:50051
+    command: npm run start:prod
+
+  users_db:
+    image: postgres:16-alpine
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_DB: ${DB_USERS_NAME:-users}
+      POSTGRES_USER: ${DB_USERS_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_USERS_PASSWORD:-postgres}
+    volumes:
+      - users_data:/var/lib/postgresql/data
+
+  users_app:
+    build: ./microservices/users
+    ports:
+      - '${USERS_PORT:-3002}:${USERS_PORT:-3002}'
+      - '50051:50051'
+    depends_on:
+      - users_db
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      USERS_PORT: ${USERS_PORT:-3002}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET_INTERNAL: ${JWT_SECRET_INTERNAL}
+      DB_USERS_HOST: users_db
+      DB_USERS_PORT: 5432
+      DB_USERS_USER: ${DB_USERS_USER:-postgres}
+      DB_USERS_PASSWORD: ${DB_USERS_PASSWORD:-postgres}
+      DB_USERS_NAME: ${DB_USERS_NAME:-users}
+    command: npm run start:prod
+
+volumes:
+  wallet_data:
+  users_data:
