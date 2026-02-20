@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Either,
   left,
@@ -26,8 +27,8 @@ export type CreateTransactionError =
 
 export class CreateTransactionUseCase {
   constructor(
-    private readonly walletRepository: IWalletRepository,
-    private readonly usersService: IUsersService,
+    @Inject(IWalletRepository) private readonly walletRepository: IWalletRepository,
+    @Inject(IUsersService) private readonly usersService: IUsersService,
   ) {}
 
   async execute(

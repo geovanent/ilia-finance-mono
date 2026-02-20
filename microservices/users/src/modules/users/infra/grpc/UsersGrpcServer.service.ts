@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { IUserRepository } from '../../domain/repository/IUserRepository.js';
 
@@ -12,7 +12,9 @@ interface CheckUserExistsResponse {
 
 @Controller()
 export class UsersGrpcServerService {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    @Inject(IUserRepository) private readonly userRepository: IUserRepository,
+  ) {}
 
   @GrpcMethod('UsersInternalService', 'CheckUserExists')
   async checkUserExists(

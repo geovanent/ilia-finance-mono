@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Post,
   Req,
   UnauthorizedException,
@@ -20,7 +21,7 @@ export class UsersController {
   constructor(
     private readonly registerUser: RegisterUser,
     private readonly loginUser: LoginUser,
-    private readonly userRepository: IUserRepository,
+    @Inject(IUserRepository) private readonly userRepository: IUserRepository,
   ) {}
 
   @Post('users')
