@@ -1,4 +1,4 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, Inject } from '@nestjs/common';
 import { User } from '../../domain/entities/User.js';
 import { IUserRepository } from '../../domain/repository/IUserRepository.js';
 import { IAuthService } from '../../domain/services/IAuthService.js';
@@ -24,8 +24,8 @@ export interface AuthResult {
 
 export class RegisterUser {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly authService: IAuthService,
+    @Inject(IUserRepository) private readonly userRepository: IUserRepository,
+    @Inject(IAuthService) private readonly authService: IAuthService,
   ) {}
 
   async execute(input: RegisterUserInput): Promise<AuthResult> {
